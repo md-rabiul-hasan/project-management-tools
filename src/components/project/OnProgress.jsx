@@ -1,11 +1,29 @@
-import React from 'react'
+import React, { useContext, useState } from 'react';
+import { ProjectContext } from '../../context';
+import { dateFormatter } from './../../util';
 
-export default function OnProgress() {
+export default function OnProgress({deleteTask, handleEditTask}) {
+    // Retrieve project data from the ProjectContext
+    const { projectData } = useContext(ProjectContext);
+    // Filter projects with the category 'done' and sort by due date in descending order initially
+    const baseData = projectData.filter(project => project.category === 'inprogress');
+    const [lowToHighSort, setLowToHighSort] = useState(false);
+  
+    // Sort function for updating order based on sort direction
+    const handleSorting = () => {
+      setLowToHighSort(prevState => !prevState); // Toggle the sort order
+    };
+  
+    // Sort the filtered data based on the current state (ascending or descending)
+    const filteredProjectData = lowToHighSort
+      ? baseData.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+      : baseData.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+
   return (
     <div className="mb-4 w-full px-2 sm:w-1/2 md:w-1/4">
               <div className="rounded-lg bg-yellow-500 p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">On Progress (45)</h3>
+                  <h3 className="text-lg font-semibold">On Progress ({filteredProjectData.length})</h3>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="18"
@@ -17,6 +35,7 @@ export default function OnProgress() {
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     className="icon icon-tabler icons-tabler-outline icon-tabler-sort-descending"
+                    onClick={handleSorting}
                   >
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M4 6l9 0" />
@@ -27,10 +46,11 @@ export default function OnProgress() {
                   </svg>
                 </div>
 
-                <div className="mb-4 rounded-lg bg-gray-800 p-4">
+                {filteredProjectData.map(project => (
+                <div key={project.id} className="mb-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex justify-between">
                     <h4 className="mb-2 flex-1 font-semibold text-yellow-500">
-                      Content Writer
+                    {project.taskName}
                     </h4>
                     <div className="flex gap-2">
                       <svg
@@ -44,6 +64,7 @@ export default function OnProgress() {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         className="h-4 w-4 cursor-pointer text-zinc-300"
+                        onClick={() => deleteTask(project.id)}
                       >
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                         <path d="M4 7l16 0" />
@@ -60,6 +81,7 @@ export default function OnProgress() {
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg"
+                        onClick={()=>handleEditTask(project)}
                       >
                         <path
                           stroke-linecap="round"
@@ -71,11 +93,14 @@ export default function OnProgress() {
                     </div>
                   </div>
                   <p className="mb-2 text-sm text-zinc-200">
-                    Prepare proctor for client meeting
+                  {project.description}
                   </p>
 
-                  <p className="mt-6 text-xs text-zinc-400">February 20, 2024</p>
+                  <p className="mt-6 text-xs text-zinc-400">{dateFormatter.format(new Date(project.dueDate))}</p>
                 </div>
+                ))}
+
+
               </div>
             </div>
   )

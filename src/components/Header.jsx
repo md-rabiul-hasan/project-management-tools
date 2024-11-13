@@ -1,4 +1,15 @@
+import React, { useContext, useState } from 'react';
+import { ProjectContext } from './../context';
 export default function (){
+  const [searchQuery, setSearchQuery] = useState('');
+  const { projectData, setProjectData } = useContext(ProjectContext);
+
+  function handleSearchChange(){
+    setSearchQuery(e.target.value);
+    const filteredProjects = projectData.filter(project => project.taskName.toLowerCase().includes(searchQuery.toLowerCase()));
+    setSearchQuery(filteredProjects);
+  }
+
     return (
         <header class="flex items-center justify-between bg-gray-800 p-4">
           <button class="lg:hidden">
@@ -22,6 +33,8 @@ export default function (){
               type="text"
               placeholder="Search here"
               class="w-full max-w-xl rounded-full bg-gray-700 px-4 py-2 text-white focus:outline-none"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
           </div>
           <div class="flex items-center">

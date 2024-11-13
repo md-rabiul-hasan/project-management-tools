@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { ModalContext } from '../context';
+import React, { useContext, useState } from 'react';
+import { ModalContext, ProjectContext } from '../context';
 import Done from './project/Done';
 import OnProgress from './project/OnProgress';
 import ProjectAddEditModal from './project/ProjectAddEditModal';
@@ -9,10 +9,28 @@ import Todo from './project/Todo';
 // ProjectContent component is the main container for the project board
 export default function ProjectContent() {
   const { showModal, setShowModal } = useContext(ModalContext);
+    // Retrieve project data and setter from context
+    const { projectData, setProjectData } = useContext(ProjectContext);
+    const [updatedTask, setUpdatedTask] = useState(null);
+
+  function deleteTask(taskId){
+    const filterProject = projectData.filter(project => project.id !== taskId);
+    setProjectData(filterProject);
+  }
+
+  function handleEditTask(task){
+    setUpdatedTask(task);
+    setShowModal(true);
+  }
+
+  function handleFormClear(){
+    setUpdatedTask(null);
+    setShowModal(false);
+  }
   
   return (
     <>
-      {showModal && (<ProjectAddEditModal />)}
+      {showModal && (<ProjectAddEditModal updatedTask={updatedTask}  handleFormClear={handleFormClear}/>)}
       <div className="mx-auto max-w-7xl p-6">
       
       {/* Header section with title and Add button */}
@@ -51,16 +69,16 @@ export default function ProjectContent() {
       {/* Main content section for project status columns */}
       <div className="-mx-2 mb-6 flex flex-wrap">
         {/* Todo column */}
-        <Todo />
+        <Todo deleteTask={deleteTask} handleEditTask={handleEditTask}/>
 
         {/* On Progress column */}
-        <OnProgress />
+        <OnProgress  deleteTask={deleteTask} handleEditTask={handleEditTask}/>
 
         {/* Done column */}
-        <Done />
+        <Done deleteTask={deleteTask} handleEditTask={handleEditTask}/>
 
         {/* Revised column */}
-        <Revised />
+        <Revised  deleteTask={deleteTask} handleEditTask={handleEditTask}/>
       </div>
     </div>
     </>
